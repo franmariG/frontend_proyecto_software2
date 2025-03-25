@@ -2,10 +2,11 @@ import React from "react";
 import { Modal, View, Text, Pressable, StyleSheet } from "react-native";
 import Icon from "@expo/vector-icons/Feather";
 import Colors from "@/constants/Colors";
+import ModalConfirmarAccion from "@/components/ModalConfirmarAccion";
 
-export default function ModalOpcionesAvanzadas({ visible, setVisible, setModoEdicion }) {
+export default function ModalOpcionesAvanzadas({ visible, setVisible, setModoEdicion, setModalConfirmarAccion }) {
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal visible={visible} transparent animationType="slide"> 
       <Pressable
         onPress={() => {
           setVisible(false);
@@ -55,13 +56,18 @@ export default function ModalOpcionesAvanzadas({ visible, setVisible, setModoEdi
               <Text style={{ fontWeight: 600 }}>Editar Perfil</Text>
             </Pressable>
             <Pressable
+              onPress={() => {
+                setVisible(false); //AGREGADO
+                setModalConfirmarAccion(true); // Abre el modal de confirmación
+              }}
               style={({ pressed }) => [
                 styles.buttonEliminarPerfil,
                 { backgroundColor: pressed ? Colors.lightGray : Colors.white },
               ]}
             >
-              <Text style={{ fontWeight: 600 }}>Eliminar Perfil</Text>
+              <Text style={{ fontWeight: 600, color: "red" }}>Eliminar Perfil</Text>
             </Pressable>
+
           </View>
         </View>
       </View>

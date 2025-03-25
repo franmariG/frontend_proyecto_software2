@@ -9,12 +9,13 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import ModalCrearLocal from "../components/ModalCrearLocal";  
+import ModalCrearLocal from "../components/ModalCrearLocal";
 import Notificacion from "@/components/ModalNotificacion";
 import ListaRestaurantes from "@/components/ListaRestaurantes";
 import { useCookies } from "react-cookie";
 import { jwtDecode as decode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import url from "@/constants/url";
 
 export default function LocalesPropios() {
   const router = useRouter();
@@ -22,46 +23,43 @@ export default function LocalesPropios() {
   const [restaurants, setRestaurants] = useState([]);
   const [cookies] = useCookies(["token"]);
   const [notificacionVisible, setNotificacionVisible] = useState(false);
-const [notificacionMensaje, setNotificacionMensaje] = useState("");
-const [notificacionExito, setNotificacionExito] = useState(false);
-const [loading, setLoading] = useState(true); 
+  const [notificacionMensaje, setNotificacionMensaje] = useState("");
+  const [notificacionExito, setNotificacionExito] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-const getToken = async () => {
-  try {
-    const value = await AsyncStorage.getItem("token");
-    if (value != null) {
-      return value;
+  const getToken = async () => {
+    try {
+      const value = await AsyncStorage.getItem("token");
+      if (value != null) {
+        return value;
+      }
+    } catch (e) {
+      console.log(e);
+      return null;
     }
-  } catch (e) {
-    console.log(e);
-    return null;
-  }
-};
+  };
 
-const getUserId = async () => {
-  const token = await getToken();
-  if (!token) return null;
+  const getUserId = async () => {
+    const token = await getToken();
+    if (!token) return null;
 
-  const decoded = decode(token);
-  return decoded.sub;
-};
+    const decoded = decode(token);
+    return decoded.sub;
+  };
 
   const getLocalesPropios = async () => {
-    const response = await fetch(
-      "https://backend-swii.vercel.app/api/getRestaurants",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + await getToken(),
-        },
-      }
-    );
+    const response = await fetch(url + "api/getRestaurants", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + (await getToken()),
+      },
+    });
 
     if (response.status === 200) {
       const data = await response.json();
 
-      if(!data.restaurantsFound){
+      if (!data.restaurantsFound) {
         setLoading(false);
         setRestaurants([]);
       }
@@ -91,7 +89,7 @@ const getUserId = async () => {
       console.log("error");
       console.log(response);
     }
-    setLoading(false); 
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -119,42 +117,44 @@ const getUserId = async () => {
       </View>
       <View style={styles.titleContainer}>
         <Text style={styles.localTitle}>LOCAL</Text>
-        <TouchableOpacity style={styles.createButton}>
-          <Text
-            style={styles.createButtonText}
-            onPress={() => setModalVisible(true)}
-          >
-            Crear
-          </Text>
-          <Ionicons name="add-circle-outline" size={22} color="#fff" />
+        <TouchableOpacity
+          style={{
+            padding: 10,
+          }}
+          onPress={() => setModalVisible(true)}
+        >
+          <View style={styles.createButton}>
+            <Text style={styles.createButtonText}>Crear</Text>
+            <Ionicons name="add-circle-outline" size={22} color="#fff" />
+          </View>
         </TouchableOpacity>
       </View>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFF" />
         </View>
-      ): restaurants.length === 0 ? ( 
+      ) : restaurants.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No has creado ningún Local aún.</Text>
         </View>
       ) : (
-      <ListaRestaurantes restaurants={restaurants} />
-  )}
+        <ListaRestaurantes restaurants={restaurants} />
+      )}
       <ModalCrearLocal
-  visible={modalVisible}
-  onClose={() => setModalVisible(false)}
-  onSuccess={(mensaje, esExito) => {
-    setNotificacionMensaje(mensaje);
-    setNotificacionExito(esExito);
-    setNotificacionVisible(true);
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSuccess={(mensaje, esExito) => {
+          setNotificacionMensaje(mensaje);
+          setNotificacionExito(esExito);
+          setNotificacionVisible(true);
 
-    if (esExito) {
-      setLoading(true);
-      getLocalesPropios(); // Recargar la lista de locales solo si fue exitoso
-      setModalVisible(false); // Cerrar modal de creación
-    }
-  }}
-/>
+          if (esExito) {
+            setLoading(true);
+            getLocalesPropios(); // Recargar la lista de locales solo si fue exitoso
+            setModalVisible(false); // Cerrar modal de creación
+          }
+        }}
+      />
 
       <Notificacion
         isVisible={notificacionVisible}
@@ -162,7 +162,6 @@ const getUserId = async () => {
         message={notificacionMensaje}
         onClose={() => setNotificacionVisible(false)}
       />
-    
     </View>
   );
 }
@@ -219,6 +218,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 5,
     marginRight: 20,
+    right: -10,
   },
   createButtonText: {
     color: "#fff",

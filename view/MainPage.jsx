@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import AsideMainPage from "../components/mainPage/AsideMainPage";
 import BotonFlecha from "../components/mainPage/BotonFlecha";
 import Colors from "../constants/Colors";
 import CameraMain from "../components/mainPage/cameraMain";
 import BotonConfiguracion from "../components/mainPage/BotonConfiguracion";
+import { useRouter } from "expo-router";
 
 function LineasDeEsquina() {
   return (
@@ -71,11 +72,16 @@ const stylesLineasDeEsquina = StyleSheet.create({
     borderBottomColor: Colors.white,
     borderLeftColor: "transparent",
     pointerEvents: "none",
-  }
+  },
 });
 
 export default function MainPage() {
   const [visible, setVisible] = useState(false);
+  const navigate = useRouter();
+
+  useEffect(() => {
+    
+  }, []);
 
   return (
     <View style={{ height: "100%", backgroundColor: Colors.primary }}>

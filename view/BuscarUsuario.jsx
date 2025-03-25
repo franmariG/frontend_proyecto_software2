@@ -1,25 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Entypo from '@expo/vector-icons/Entypo';
+import {
+  View,
+  Text,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import url from "@/constants/url";
 
 export default function BuscarUsuario() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
-  const [searchType, setSearchType] = useState("id"); 
+  const [searchType, setSearchType] = useState("id");
   const [loading, setLoading] = useState(false);
 
   const getToken = async () => {
-
     try {
       const value = await AsyncStorage.getItem("token");
       if (value != null) {
         return value;
-      } 
+      }
     } catch (e) {
       console.log(e);
       return null;
@@ -34,7 +43,7 @@ export default function BuscarUsuario() {
       const token = await getToken();
       let response;
       if (searchType === "id") {
-        response = await fetch(`https://backend-swii.vercel.app/api/getUser/${search}`, {
+        response = await fetch(url + `api/getUser/${search}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -42,7 +51,7 @@ export default function BuscarUsuario() {
           },
         });
       } else {
-        response = await fetch(`https://backend-swii.vercel.app/api/getUserByName`, {
+        response = await fetch(url + `api/getUserByName`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -60,27 +69,30 @@ export default function BuscarUsuario() {
       } else {
         setUsers(Array.isArray(data.usersFound) ? data.usersFound : []);
       }
-      } catch (error) {
-        console.error("Error al buscar usuario", error);
-        setUsers([]);
-      } finally {
-        setLoading(false);
-      }
+    } catch (error) {
+      console.error("Error al buscar usuario", error);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    
     <View style={styles.container}>
-      
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Image source={require("@/assets/images/backButtonLocal.png")} style={styles.iconBack} />
+          <Image
+            source={require("@/assets/images/backButtonLocal.png")}
+            style={styles.iconBack}
+          />
         </TouchableOpacity>
-        <Image source={require("@/assets/images/logo_recortado.png")} style={styles.logo} />
+        <Image
+          source={require("@/assets/images/logo_recortado.png")}
+          style={styles.logo}
+        />
         <Text style={styles.title}>FOODIGO</Text>
       </View>
 
-      
       <Text style={styles.Usuariostitle}>USUARIOS</Text>
 
       {/* barra de búsqueda */}
@@ -88,21 +100,38 @@ export default function BuscarUsuario() {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.input}
-            placeholder={searchType === 'id' ? "Buscar usuario por ID" : "Buscar usuario por nombre"}
+            placeholder={
+              searchType === "id"
+                ? "Buscar usuario por ID"
+                : "Buscar usuario por nombre"
+            }
             placeholderTextColor="#888"
             value={search}
             onChangeText={setSearch}
           />
-            <MaterialCommunityIcons name="account-search-outline" size={26} color="#797979" />
-          
+          <MaterialCommunityIcons
+            name="account-search-outline"
+            size={26}
+            color="#797979"
+          />
         </View>
 
         <View style={styles.toggleContainer}>
           <TouchableOpacity onPress={() => setSearchType("id")}>
-            <Text style={searchType === 'id' ? styles.activeToggle : styles.toggle}>Buscar por ID</Text>
+            <Text
+              style={searchType === "id" ? styles.activeToggle : styles.toggle}
+            >
+              Buscar por ID
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setSearchType("nombre")}>
-            <Text style={searchType === 'nombre' ? styles.activeToggle : styles.toggle}>Buscar por Nombre</Text>
+            <Text
+              style={
+                searchType === "nombre" ? styles.activeToggle : styles.toggle
+              }
+            >
+              Buscar por Nombre
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -111,40 +140,44 @@ export default function BuscarUsuario() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.linea}></View> 
+      <View style={styles.linea}></View>
 
       {loading ? (
         <ActivityIndicator size="large" color="#029cec" />
-        ) : (
+      ) : (
         <ScrollView>
           {users.length > 0 ? (
-            users.map(user => (
-            <View key={user._id} style={styles.userCard}>
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user.name}</Text>
-                <View style={styles.icon}> 
-                  <FontAwesome name="user-circle" size={14} color="#8f2319" />
-                  <Text style={styles.userDetail}> ID: {user._id}</Text>
+            users.map((user) => (
+              <View key={user._id} style={styles.userCard}>
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>{user.name}</Text>
+                  <View style={styles.icon}>
+                    <FontAwesome name="user-circle" size={14} color="#8f2319" />
+                    <Text style={styles.userDetail}> ID: {user._id}</Text>
+                  </View>
+                  <View style={styles.icon}>
+                    <Entypo name="mail-with-circle" size={15} color="#8f2319" />
+                    <Text style={styles.userDetail}> {user.email}</Text>
+                  </View>
                 </View>
-                <View style={styles.icon}> 
-                  <Entypo name="mail-with-circle" size={15} color="#8f2319" /> 
-                  <Text style={styles.userDetail}> {user.email}</Text>
+                <View style={styles.circleContainer}>
+                  <Image
+                    source={{
+                      uri: user.fotoPerfil || "https://via.placeholder.com/80",
+                    }}
+                    style={styles.userImage}
+                  />
                 </View>
               </View>
-              <View style={styles.circleContainer}>
-                <Image source={{ uri: user.fotoPerfil || 'https://via.placeholder.com/80' }} style={styles.userImage} />
-              </View>
-            </View>
-          )) 
-        ) : (
-          <Text style={styles.noResults}>No se encontraron usuarios.</Text>
-        )}
-      </ScrollView>
-    )}
+            ))
+          ) : (
+            <Text style={styles.noResults}>No se encontraron usuarios.</Text>
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -198,7 +231,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  linea:{
+  linea: {
     width: "100%",
     borderWidth: 0.3,
     borderColor: "#ccc",
@@ -234,7 +267,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginHorizontal: 20,
     marginBottom: 20,
-    borderRadius: 10, 
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ccc",
     shadowColor: "#000",
@@ -251,7 +284,7 @@ const styles = StyleSheet.create({
     fontFamily: "OpenSans-Bold",
     marginBottom: 15,
   },
-  icon:{
+  icon: {
     marginLeft: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -279,40 +312,38 @@ const styles = StyleSheet.create({
     borderColor: "#800000",
     justifyContent: "center",
     alignItems: "center",
-  }, 
-   noResults: {
-    textAlign: 'center',
+  },
+  noResults: {
+    textAlign: "center",
     marginTop: 20,
     fontSize: 16,
-    color: '#888',
+    color: "#888",
   },
   toggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
     marginBottom: 30,
   },
-  toggle: { 
+  toggle: {
     paddingVertical: 8,
     paddingHorizontal: 20,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
     marginHorizontal: 5,
-    backgroundColor: '#f9f9f9',
-    color: '#888',
+    backgroundColor: "#f9f9f9",
+    color: "#888",
   },
   activeToggle: {
     paddingVertical: 8,
     paddingHorizontal: 20,
     borderWidth: 2,
-    borderColor: '#029cec',
+    borderColor: "#029cec",
     borderRadius: 8,
     marginHorizontal: 5,
-    backgroundColor: '#f9f9f9',
-    color: '#000',
-    
-  }
-
-}); 
+    backgroundColor: "#f9f9f9",
+    color: "#000",
+  },
+});

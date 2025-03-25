@@ -8,6 +8,7 @@ import {
   ScrollView,
   FlatList,
   Pressable,
+  Dimensions,
 } from "react-native";
 import * as Font from "expo-font";
 import { Tab, TabView } from "@rneui/themed";
@@ -16,6 +17,7 @@ import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import PlaceholderText from "../PlaceholderText";
 import PlaceholderFoto from "../PlaceHolderFoto";
+import url from "@/constants/url";
 
 const RenderImagen = ({ item }) => {
   return (
@@ -48,7 +50,7 @@ export default function TabDescripcion({ restaurante, setDataModalFoto }) {
   };
 
   return (
-    <TabView.Item>
+    <TabView.Item style={{ width: "100%" }}>
       <ScrollView horizontal={false}>
         <View
           style={{

@@ -12,6 +12,7 @@ import ListaRestaurantes from "@/components/ListaRestaurantes";
 import { useCookies } from "react-cookie";
 import { jwtDecode as decode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import url from "@/constants/url";
 
 export default function Historial() {
   const router = useRouter();
@@ -42,8 +43,7 @@ export default function Historial() {
   const getHistorial = async () => {
     setLoading(true);
     const response = await fetch(
-      "https://backend-swii.vercel.app/api/getRestaurantsShowed/" +
-        (await getUserId()),
+      url + "api/getRestaurantsShowed/" + (await getUserId()),
       {
         method: "GET",
         headers: {
@@ -88,7 +88,7 @@ export default function Historial() {
           totalReviews,
         };
       });
-      const idUser = await getUserId(); 
+      const idUser = await getUserId();
 
       setRestaurants(processedRestaurants.filter((item) => item.own != idUser));
     }

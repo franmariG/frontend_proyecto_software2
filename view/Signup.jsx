@@ -14,12 +14,13 @@ import Colors from "@/constants/Colors";
 import Entypo from "@expo/vector-icons/Entypo";
 import * as ImagePicker from "expo-image-picker";
 import Notificacion from "@/components/ModalNotificacion";
-import { useFetch } from "../utils/fetch/useFetch"; 
+import { useFetch } from "../utils/fetch/useFetch";
 import endpoints from "../utils/fetch/endpoints-importantes.json";
 import Arrow from "@/components/Arrow";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
 import ModalDeCarga from "@/components/ModalDeCarga";
+import url from "@/constants/url";
 
 export default function Signup() {
   const router = useRouter();
@@ -32,12 +33,13 @@ export default function Signup() {
   const [nombreFocused, setNombreFocused] = React.useState(false);
   const [correoFocused, setCorreoFocused] = React.useState(false);
   const [PasswordFocused, setPasswordFocused] = React.useState(false);
-  const [confirmarPasswordFocused, setConfirmarPasswordFocused] = React.useState(false);
+  const [confirmarPasswordFocused, setConfirmarPasswordFocused] =
+    React.useState(false);
 
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
   //Handle preview
-  const [selectedImage, setSelectedImage] = useState(null); 
+  const [selectedImage, setSelectedImage] = useState(null);
   const [previewVisible, setPreviewVisible] = useState(false);
 
   // Estados para el formulario y userData
@@ -56,7 +58,7 @@ export default function Signup() {
       {
         pregunta: "",
         respuesta: "",
-      }
+      },
     ],
   });
 
@@ -75,9 +77,13 @@ export default function Signup() {
   const [modalMessage, setModalMessage] = useState(""); // Mensaje del modal
   const [modalSuccess, setModalSuccess] = useState(false); // Éxito del modal
 
-  const [preguntaSeguridad1, setPreguntaSeguridad1] = useState(preguntasSeguridad[0]);
+  const [preguntaSeguridad1, setPreguntaSeguridad1] = useState(
+    preguntasSeguridad[0]
+  );
   const [respuestaSeguridad1, setRespuestaSeguridad1] = useState("");
-  const [preguntaSeguridad2, setPreguntaSeguridad2] = useState(preguntasSeguridad[1]);
+  const [preguntaSeguridad2, setPreguntaSeguridad2] = useState(
+    preguntasSeguridad[1]
+  );
   const [respuestaSeguridad2, setRespuestaSeguridad2] = useState("");
 
   const { data, loading, error, fetchData } = useFetch();
@@ -128,10 +134,8 @@ export default function Signup() {
       return false;
     }
 
-    if(!userData.fotoPerfil) {
-      setModalMessage(
-        "Es necesario que suba una foto de perfil"
-      );
+    if (!userData.fotoPerfil) {
+      setModalMessage("Es necesario que suba una foto de perfil");
       setModalSuccess(false);
       setModalVisible(true);
       return false;
@@ -164,17 +168,21 @@ export default function Signup() {
       setModalSuccess(false);
       setModalVisible(true);
       return false;
-    }   
-    
+    }
+
     if (!respuestaSeguridad1 || !respuestaSeguridad2) {
-      setModalMessage("Por favor, complete todas las preguntas y respuestas de seguridad.");
+      setModalMessage(
+        "Por favor, complete todas las preguntas y respuestas de seguridad."
+      );
       setModalSuccess(false);
       setModalVisible(true);
       return false;
     }
-  
+
     if (preguntaSeguridad1 === preguntaSeguridad2) {
-      setModalMessage("Por favor, seleccione preguntas de seguridad diferentes.");
+      setModalMessage(
+        "Por favor, seleccione preguntas de seguridad diferentes."
+      );
       setModalSuccess(false);
       setModalVisible(true);
       return false;
@@ -183,7 +191,7 @@ export default function Signup() {
     //   SE ALCANZO EL LIMITE DE LA PRUEBA GRATUITA
     //  VALIDACION DESABILITADA TEMPORALMENTE
 
-    // setLoadingModalVisible(true); 
+    // setLoadingModalVisible(true);
 
     // const emailValidationUrl = `https://emailverification.whoisxmlapi.com/api/v3?apiKey=at_iFCVm77T67rg3vK28nnSUdCUNkpwW&emailAddress=${userData.email}`;
     // const emailValidationOptions = {
@@ -191,13 +199,13 @@ export default function Signup() {
     //   headers: { accept: "application/json" },
     // };
 
-    // await validateEmail(emailValidationUrl, emailValidationOptions); 
+    // await validateEmail(emailValidationUrl, emailValidationOptions);
 
     // if (emailValidationError) {
     //   setModalMessage(
     //     "Error al validar el correo electrónico: " +
-    //       (emailValidationError.message || "Error desconocido")        
-    //   );      
+    //       (emailValidationError.message || "Error desconocido")
+    //   );
     //   setModalSuccess(false);
     //   setModalVisible(true);
     //   setLoadingModalVisible(false);
@@ -210,8 +218,8 @@ export default function Signup() {
     //   setModalVisible(true);
     //   setLoadingModalVisible(false);
     //   return false;
-    // }   
-        
+    // }
+
     return true;
   };
 
@@ -221,10 +229,10 @@ export default function Signup() {
       preguntasDeSeguridad: [
         { pregunta: preguntaSeguridad1, respuesta: respuestaSeguridad1 },
         { pregunta: preguntaSeguridad2, respuesta: respuestaSeguridad2 },
-      ],      
+      ],
     });
     return true;
-  }
+  };
 
   const seleccionarImagen = async () => {
     // Pedir permiso de acceso a la galería
@@ -244,10 +252,10 @@ export default function Signup() {
     });
 
     // Si el usuario no cancela, guardar la imagen seleccionada
-    if (!resultado.canceled) {        
+    if (!resultado.canceled) {
       setSelectedImage(resultado.assets[0]); // Guarda la imagen seleccionada
       setPreviewVisible(true);
-    }      
+    }
   };
 
   const aceptarImagen = () => {
@@ -255,26 +263,25 @@ export default function Signup() {
     setUserData({ ...userData, fotoPerfil: fotoPerfilBase64 });
     setPreviewVisible(false);
   };
-  
+
   const rechazarImagen = () => {
     setSelectedImage(null);
     setPreviewVisible(false);
   };
 
-  const handleSignup = async () => {        
-    if (!(await validarFormulario())) {      
-      console.log(userData)
+  const handleSignup = async () => {
+    if (!(await validarFormulario())) {
+      console.log(userData);
       return;
     }
 
-    if(!(await updatePreguntasUserData())) {
+    if (!(await updatePreguntasUserData())) {
       return;
     }
 
     setLoadingModalVisible(true);
-    
 
-    await fetchData("https://backend-swii.vercel.app/api/createUser", {
+    await fetchData(url + "api/createUser", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -294,9 +301,9 @@ export default function Signup() {
 
   useEffect(() => {
     if (loading) return;
-    if(emailValidationLoading) return;
+    if (emailValidationLoading) return;
 
-    setLoadingModalVisible(false); 
+    setLoadingModalVisible(false);
 
     if (error) {
       setModalMessage(error.message || "Error al crear usuario.");
@@ -321,7 +328,7 @@ export default function Signup() {
           {
             pregunta: "",
             respuesta: "",
-          }
+          },
         ],
       });
       saveToken(data.token);
@@ -329,7 +336,7 @@ export default function Signup() {
   }, [loading, error, data]);
 
   const Signup = () => {
-    router.push("mainpage");
+    router.replace("mainpage");
   };
 
   const closeModal = () => {
@@ -452,7 +459,12 @@ export default function Signup() {
               dropdownIconColor={Colors.lightGray}
             >
               {preguntasSeguridad.map((pregunta, index) => (
-                <Picker.Item key={index} label={pregunta} value={pregunta} style={styles.pickerItem}/>
+                <Picker.Item
+                  key={index}
+                  label={pregunta}
+                  value={pregunta}
+                  style={styles.pickerItem}
+                />
               ))}
             </Picker>
           </View>
@@ -475,10 +487,15 @@ export default function Signup() {
               itemStyle={styles.pickerItem}
             >
               {preguntasSeguridad.map((pregunta, index) => (
-                <Picker.Item key={index} label={pregunta} value={pregunta} style={styles.pickerItem}/>
+                <Picker.Item
+                  key={index}
+                  label={pregunta}
+                  value={pregunta}
+                  style={styles.pickerItem}
+                />
               ))}
             </Picker>
-          </View >
+          </View>
           <View style={styles.textInputContainer}>
             <TextInput
               placeholderTextColor={"#acacac"}
@@ -496,10 +513,12 @@ export default function Signup() {
           style={({ pressed }) => [
             styles.button,
             styles.buttonWithIcon,
-            pressed && {backgroundColor: Colors.primary},            
+            pressed && { backgroundColor: Colors.primary },
           ]}
         >
-          <Text style={[styles.textButton, {color: Colors.white}]}>Subir foto</Text>
+          <Text style={[styles.textButton, { color: Colors.white }]}>
+            Subir foto
+          </Text>
           <Entypo
             name="camera"
             size={24}
@@ -510,18 +529,29 @@ export default function Signup() {
 
         <View style={styles.buttonGroup}>
           <Pressable
-            onPress={() => router.push("/")}
+            onPress={() => router.replace("/")}
             style={({ pressed }) => [
               styles.buttonWithIcon,
-              {padding: 15,
-              borderRadius: 10,
-              },
-              {backgroundColor: Colors.vinoDark},
-              pressed && {backgroundColor: Colors.vino},
+              { padding: 15, borderRadius: 10 },
+              { backgroundColor: Colors.vinoDark },
+              pressed && { backgroundColor: Colors.vino },
             ]}
           >
-            <Text style={[styles.textButton, {color: Colors.white, marginLeft: 30}]}>Volver</Text>
-            <View style={{ left: 15, position: "absolute", transform: [{ rotate: "180deg" }] }}>
+            <Text
+              style={[
+                styles.textButton,
+                { color: Colors.white, marginLeft: 30 },
+              ]}
+            >
+              Volver
+            </Text>
+            <View
+              style={{
+                left: 15,
+                position: "absolute",
+                transform: [{ rotate: "180deg" }],
+              }}
+            >
               <Arrow />
             </View>
           </Pressable>
@@ -529,15 +559,20 @@ export default function Signup() {
           <Pressable
             style={({ pressed }) => [
               styles.buttonWithIcon,
-              {backgroundColor: Colors.vino},
-              {padding: 15,
-              borderRadius: 10,
-              },
-              pressed && {backgroundColor: Colors.vinoDark}, 
+              { backgroundColor: Colors.vino },
+              { padding: 15, borderRadius: 10 },
+              pressed && { backgroundColor: Colors.vinoDark },
             ]}
             onPress={() => handleSignup()}
           >
-            <Text style={[styles.textButton, {color: Colors.white, marginRight: 30}]}>Aceptar</Text>
+            <Text
+              style={[
+                styles.textButton,
+                { color: Colors.white, marginRight: 30 },
+              ]}
+            >
+              Aceptar
+            </Text>
             <View style={{ right: 15, position: "absolute" }}>
               <Arrow />
             </View>
@@ -550,7 +585,7 @@ export default function Signup() {
         message={modalMessage}
         onClose={closeModal}
       />
-     <ModalDeCarga visible={loadingModalVisible} />
+      <ModalDeCarga visible={loadingModalVisible} />
       {previewVisible && (
         <View style={styles.previewContainer}>
           <Image
@@ -558,17 +593,24 @@ export default function Signup() {
             style={styles.fotoPerfil}
           />
           <View style={styles.previewButtons}>
-            <Pressable onPress={aceptarImagen} style={({ pressed }) =>[
-              styles.previewButton,
-              {backgroundColor: Colors.blue},
-              pressed && {backgroundColor: Colors.primary}]}>
+            <Pressable
+              onPress={aceptarImagen}
+              style={({ pressed }) => [
+                styles.previewButton,
+                { backgroundColor: Colors.blue },
+                pressed && { backgroundColor: Colors.primary },
+              ]}
+            >
               <Text style={styles.previewButtonText}>Aceptar</Text>
             </Pressable>
-            <Pressable onPress={rechazarImagen} style={({ pressed }) => [
-              styles.previewButton,
-              { backgroundColor: Colors.vino },
-              pressed && {backgroundColor: Colors.vinoDark},               
-            ]}>
+            <Pressable
+              onPress={rechazarImagen}
+              style={({ pressed }) => [
+                styles.previewButton,
+                { backgroundColor: Colors.vino },
+                pressed && { backgroundColor: Colors.vinoDark },
+              ]}
+            >
               <Text style={styles.previewButtonText}>Rechazar</Text>
             </Pressable>
           </View>
@@ -585,7 +627,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     overflowY: "scroll",
-    maxHeight: 1000
+    maxHeight: 1000,
   },
   logoContainer: {
     flexDirection: "row",
@@ -597,12 +639,12 @@ const styles = StyleSheet.create({
   logoImage: {
     width: "12%",
     height: "70%",
-    resizeMode: "contain"
+    resizeMode: "contain",
   },
   logoText: {
-    color: '#FFF',
-    fontFamily: 'League-Gothic',
-    fontSize: 70,    
+    color: "#FFF",
+    fontFamily: "League-Gothic",
+    fontSize: 70,
   },
   container: {
     flexDirection: "column",
@@ -611,12 +653,12 @@ const styles = StyleSheet.create({
     padding: 20,
     width: "90%",
     gap: 10,
-    borderRadius: 5
+    borderRadius: 5,
   },
   inputContainer: {
     flexDirection: "column",
     width: "100%",
-    gap: 5
+    gap: 5,
   },
   titulo: {
     color: Colors.white,
@@ -646,11 +688,11 @@ const styles = StyleSheet.create({
     color: Colors.lightGray,
     position: "absolute",
     right: 5,
-    bottom: 0
-  }, 
+    bottom: 0,
+  },
   passwordContainer: {
     justifyContent: "center",
-    margin: 0
+    margin: 0,
   },
   eyeIcon: {
     position: "absolute",
@@ -676,7 +718,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
     height: 40,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   button: {
     backgroundColor: Colors.white,
@@ -692,7 +734,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: Colors.blue,
-    borderWidth: .8,
+    borderWidth: 0.8,
     borderColor: Colors.white,
     borderStyle: "dashed",
     paddingVertical: 8,
@@ -715,7 +757,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 25,
     width: "100%",
-    marginTop: 10
+    marginTop: 10,
   },
   fotoPerfil: {
     width: 400,

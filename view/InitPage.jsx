@@ -56,7 +56,7 @@ export default function Login() {
     try {
       const value = await AsyncStorage.getItem('token');
       if (value !== null) {
-        router.push("mainpage");
+        router.replace("mainpage");
       }
     } catch (e) {
       console.log(e)
@@ -77,7 +77,7 @@ export default function Login() {
             >
               <View style={styles.containerButton}>
                 <Pressable
-                  onPress={() => router.push("login")}
+                  onPress={() => router.replace("login")}
                   style={{ ...styles.button, backgroundColor: "#850901" }}
                 >
                   <Text style={{ ...styles.textButton, marginHorizontal: 10 }}>
@@ -88,7 +88,7 @@ export default function Login() {
                   </View>
                 </Pressable>
                 <Pressable
-                  onPress={() => router.push("signup")}
+                  onPress={() => router.replace("signup")}
                   style={{ ...styles.button, backgroundColor: "#5a1a11" }}
                 >
                   <Text style={{ ...styles.textButton, marginHorizontal: 15 }}>

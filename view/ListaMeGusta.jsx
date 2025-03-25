@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { useCookies } from "react-cookie";
 import { jwtDecode as decode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import url from "@/constants/url";
 
 export default function ListaMeGusta() {
   const router = useRouter();
@@ -42,8 +43,7 @@ export default function ListaMeGusta() {
   const getListaMeGusta = async () => {
     setLoading(true);
     const response = await fetch(
-      "https://backend-swii.vercel.app/api/getRestaurantsLiked/" +
-        (await getUserId()),
+      url + "api/getRestaurantsLiked/" + (await getUserId()),
       {
         method: "GET",
         headers: {
@@ -100,7 +100,7 @@ export default function ListaMeGusta() {
 
   const removeRestaurantFromLiked = async (restaurantId) => {
     const response = await fetch(
-      `https://backend-swii.vercel.app/api/deleteRestaurantFromLiked/${await getUserId()}`,
+      url + `api/deleteRestaurantFromLiked/${await getUserId()}`,
       {
         method: "PUT",
         headers: {

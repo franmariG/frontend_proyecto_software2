@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Image, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
-import Zocial from '@expo/vector-icons/Zocial';
+import Zocial from "@expo/vector-icons/Zocial";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ModalNotificacion from "@/components/ModalNotificacion";
+import url from "@/constants/url";
 
 const DenunciasScreenLocales = () => {
   const router = useRouter();
@@ -32,22 +41,25 @@ const DenunciasScreenLocales = () => {
 
   const fetchDenuncias = async () => {
     try {
-      const response = await fetch('https://backend-swii.vercel.app/api/getDenuncias', {
-        method: 'GET',
+      const response = await fetch(url + "api/getDenuncias", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
       });
       const data = await response.json();
       if (data && Array.isArray(data.denuncias)) {
-        const filteredDenuncias = data.denuncias.filter(denuncia => denuncia.idComentario === "" && denuncia.tipo !== "BANEADO");
+        const filteredDenuncias = data.denuncias.filter(
+          (denuncia) =>
+            denuncia.idComentario === "" && denuncia.tipo !== "BANEADO"
+        );
         setDenuncias(filteredDenuncias);
       } else {
-        console.error('Unexpected response format:', data);
+        console.error("Unexpected response format:", data);
       }
     } catch (error) {
-      console.error('Error fetching denuncias:', error);
+      console.error("Error fetching denuncias:", error);
     } finally {
       setLoading(false);
     }
@@ -55,11 +67,11 @@ const DenunciasScreenLocales = () => {
 
   const fetchUserData = async (id) => {
     try {
-      const response = await fetch(`https://backend-swii.vercel.app/api/getUser/${id}`, {
-        method: 'GET',
+      const response = await fetch(url + `api/getUser/${id}`, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
       });
       const data = await response.json();
@@ -69,20 +81,20 @@ const DenunciasScreenLocales = () => {
           [id]: data.userFound.name,
         }));
       } else {
-        console.error('Unexpected response format:', data);
+        console.error("Unexpected response format:", data);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error("Error fetching user data:", error);
     }
   };
 
   const fetchNameRestaurant = async (id) => {
     try {
-      const response = await fetch(`https://backend-swii.vercel.app/api/getRestaurant/${id}`, {
-        method: 'GET',
+      const response = await fetch(url + `api/getRestaurant/${id}`, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
       });
       const data = await response.json();
@@ -93,40 +105,42 @@ const DenunciasScreenLocales = () => {
         }));
         //console.log(`Restaurant name for ${id}:`, data.restaurantFound.name);
       } else {
-        console.error('Unexpected response format:', data);
+        console.error("Unexpected response format:", data);
       }
     } catch (error) {
-      console.error('Error fetching restaurant data:', error);
+      console.error("Error fetching restaurant data:", error);
     }
   };
 
   const deleteDenuncia = async (denunciaId) => {
     try {
-      const response = await fetch(`https://backend-swii.vercel.app/api/deleteDenuncia/${denunciaId}`, {
-        method: 'DELETE',
+      const response = await fetch(url + `api/deleteDenuncia/${denunciaId}`, {
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
       });
       if (response.ok) {
         console.log(`Denuncia ${denunciaId} eliminada exitosamente`);
-        setDenuncias((prevDenuncias) => prevDenuncias.filter((denuncia) => denuncia._id !== denunciaId));
+        setDenuncias((prevDenuncias) =>
+          prevDenuncias.filter((denuncia) => denuncia._id !== denunciaId)
+        );
       } else {
-        console.error('Error eliminando la denuncia:', response.statusText);
+        console.error("Error eliminando la denuncia:", response.statusText);
       }
     } catch (error) {
-      console.error('Error eliminando la denuncia:', error);
+      console.error("Error eliminando la denuncia:", error);
     }
   };
 
   const processDenuncia = async (denunciaId) => {
     try {
-      const response = await fetch(`https://backend-swii.vercel.app/api/procesarDenuncia/${denunciaId}`, {
-        method: 'POST',
+      const response = await fetch(url + `api/procesarDenuncia/${denunciaId}`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
         body: JSON.stringify({
           tipo: "BANEADO",
@@ -139,7 +153,10 @@ const DenunciasScreenLocales = () => {
         setModalSuccess(true);
         setModalVisible(true);
       } else {
-        console.error(`Error procesando la denuncia ${denunciaId}:`, response.statusText);
+        console.error(
+          `Error procesando la denuncia ${denunciaId}:`,
+          response.statusText
+        );
         setModalMessage("Error procesando la denuncia.");
         setModalSuccess(false);
         setModalVisible(true);
@@ -180,7 +197,7 @@ const DenunciasScreenLocales = () => {
   const handleAction = (id, isOmit) => {
     if (isOmit) {
       deleteDenuncia(id);
-      } else {
+    } else {
       processDenuncia(id);
       setDenuncias(denuncias.filter((denuncia) => denuncia._id !== id));
     }
@@ -191,12 +208,18 @@ const DenunciasScreenLocales = () => {
       {/* Encabezado */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push("/mainpage")}>
-          <Image source={require("@/assets/images/backButtonLocal.png")} style={styles.backButton} />
+          <Image
+            source={require("@/assets/images/backButtonLocal.png")}
+            style={styles.backButton}
+          />
         </TouchableOpacity>
-        <Image source={require("@/assets/images/Logo.png")} style={styles.logo} />
+        <Image
+          source={require("@/assets/images/Logo.png")}
+          style={styles.logo}
+        />
         <Text style={styles.title}>FOODIGO</Text>
       </View>
-      
+
       <Text style={styles.heading}>DENUNCIAS</Text>
       <Text style={styles.subheading}>Locales</Text>
       <View style={styles.separator} />
@@ -206,7 +229,9 @@ const DenunciasScreenLocales = () => {
       ) : (
         <>
           {denuncias.length === 0 && (
-            <Text style={styles.noDenunciasText}>No se han encontrado denuncias</Text>
+            <Text style={styles.noDenunciasText}>
+              No se han encontrado denuncias
+            </Text>
           )}
           <FlatList
             data={denuncias}
@@ -217,33 +242,50 @@ const DenunciasScreenLocales = () => {
                   <View style={styles.textContainer}>
                     <View style={styles.iconCircle}>
                       <FontAwesome name="home" size={12} color="white" />
-                    </View> 
-                    <Text><Text style={styles.bold}>Denunciante:</Text> {userNames[item.idDenunciante] || item.idDenunciante}</Text>
+                    </View>
+                    <Text>
+                      <Text style={styles.bold}>Denunciante:</Text>{" "}
+                      {userNames[item.idDenunciante] || item.idDenunciante}
+                    </Text>
                   </View>
                   <View style={styles.textContainer}>
                     <View style={styles.iconCircle}>
                       <FontAwesome name="user" size={12} color="white" />
-                    </View> 
-                    <Text><Text style={styles.bold}>Denunciado:</Text> {userNames[item.idDenunciado] || item.idDenunciado}</Text>
+                    </View>
+                    <Text>
+                      <Text style={styles.bold}>Denunciado:</Text>{" "}
+                      {userNames[item.idDenunciado] || item.idDenunciado}
+                    </Text>
                   </View>
                   <View style={styles.textContainer}>
                     <View style={styles.iconCircle}>
                       <FontAwesome name="question" size={12} color="white" />
-                    </View> 
-                    <Text><Text style={styles.bold}>Razón:</Text> {item.razon}</Text>
+                    </View>
+                    <Text>
+                      <Text style={styles.bold}>Razón:</Text> {item.razon}
+                    </Text>
                   </View>
                   <View style={styles.textContainer}>
                     <View style={styles.iconCircle}>
                       <Zocial name="email" size={12} color="white" />
-                    </View> 
-                    <Text><Text style={styles.bold}>Comentario:</Text> {item.observacion}</Text>
+                    </View>
+                    <Text>
+                      <Text style={styles.bold}>Comentario:</Text>{" "}
+                      {item.observacion}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.buttonContainer}>
-                  <TouchableOpacity style={styles.blockButton} onPress={() => handleAction(item._id, false)}>
+                  <TouchableOpacity
+                    style={styles.blockButton}
+                    onPress={() => handleAction(item._id, false)}
+                  >
                     <Text style={styles.buttonText}>Bloquear</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.omitButton} onPress={() => handleAction(item._id, true)}>
+                  <TouchableOpacity
+                    style={styles.omitButton}
+                    onPress={() => handleAction(item._id, true)}
+                  >
                     <Text style={styles.buttonText}>Omitir</Text>
                   </TouchableOpacity>
                 </View>
@@ -302,7 +344,6 @@ const styles = StyleSheet.create({
     color: "black",
     marginBottom: 10,
     marginLeft: 20,
-    
   },
   separator: {
     height: 1.5,

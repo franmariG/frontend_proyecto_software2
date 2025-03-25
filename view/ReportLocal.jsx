@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ModalNotificacion from "@/components/ModalNotificacion";
 import ModalDeCarga from "@/components/ModalDeCarga";
+import url from "@/constants/url";
 
 export default function ReportLocal({ idRestaurante, visible, onClose }) {
   const [textComment, setTextComment] = useState("");
@@ -147,7 +148,7 @@ export default function ReportLocal({ idRestaurante, visible, onClose }) {
 
     try {
       const response = await fetch(
-        `https://backend-swii.vercel.app/api/denunciarRestaurante/${idRestaurante}`,
+        url + `api/denunciarRestaurante/${idRestaurante}`,
         {
           method: "POST",
           headers: {

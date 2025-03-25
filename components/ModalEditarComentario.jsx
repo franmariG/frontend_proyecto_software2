@@ -23,6 +23,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { set } from "react-hook-form";
 import ModalNotificacion from "./ModalNotificacion";
 import ModalDeCarga from "./ModalDeCarga";
+import url from "@/constants/url";
 
 const StarRating = ({ setStarts, stars }) => {
   return (
@@ -86,16 +87,13 @@ export default function ModalEditarComentario({
   };
 
   const getUser = async () => {
-    const response = await fetch(
-      "https://backend-swii.vercel.app/api/getUser/" + (await getUserId()),
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${await getToken()}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(url + "api/getUser/" + (await getUserId()), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${await getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (response.status == 200) {
       const data = await response.json();
@@ -113,7 +111,7 @@ export default function ModalEditarComentario({
     setLoading(true);
     try {
       const response = await fetch(
-        "https://backend-swii.vercel.app/api/updateComment/" + restaurante._id,
+        url + "api/updateComment/" + restaurante._id,
         {
           method: "PUT",
           headers: {
@@ -135,7 +133,7 @@ export default function ModalEditarComentario({
           message: "Comentario editado.",
           success: true,
         });
-        console.log(response)
+        console.log(response);
         setLoading(false);
       } else {
         console.log("Error Editar Comentario");

@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode as decode } from "jwt-decode";
+import url from "@/constants/url";
 import ModalNotificacion from "@/components/ModalNotificacion";
 
 export default function ReportComment({
@@ -153,7 +154,7 @@ export default function ReportComment({
 
     try {
       const response = await fetch(
-        `https://backend-swii.vercel.app/api/denunciarComentario/${idRestaurante}/${idComentario}/`,
+        url + `api/denunciarComentario/${idRestaurante}/${idComentario}/`,
         {
           method: "POST",
           headers: {
@@ -283,10 +284,15 @@ export default function ReportComment({
           </View>
         </View>
       </Modal>
-      <ModalNotificacion isVisible={modalPeticion.visible} isSuccess={modalPeticion.success} message={modalPeticion.message} onClose={() => {
-        setModalPeticion({ visible: false, message: "", success: false });
-        onClose()
-      }} />
+      <ModalNotificacion
+        isVisible={modalPeticion.visible}
+        isSuccess={modalPeticion.success}
+        message={modalPeticion.message}
+        onClose={() => {
+          setModalPeticion({ visible: false, message: "", success: false });
+          onClose();
+        }}
+      />
     </>
   );
 }

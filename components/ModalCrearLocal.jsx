@@ -15,6 +15,7 @@ import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import ModalDeCarga from "../components/ModalDeCarga"; // Importar el modal de carga
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import url from "@/constants/url";
 
 export default function ModalCrearLocal({ visible, onClose, onSuccess }) {
   const [nombre, setNombre] = useState("");
@@ -127,29 +128,26 @@ export default function ModalCrearLocal({ visible, onClose, onSuccess }) {
       setLoading(false);
       return;
     }
-    const response = await fetch(
-      "https://backend-swii.vercel.app/api/createRestaurant",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          name: nombre,
-          own: userId,
-          fotoPerfil: imagenPrincipal,
-          description: descripcion,
-          etiquetas: etiquetas,
-          address: ubicacion,
-          latitude: parseFloat(coordenadas.latitude), // Convertir a número si es string
-          longitude: parseFloat(coordenadas.longitude),
-          viewed: 0, // Inicialmente en 0
-          reviews: [], // Iniciar con un array vacío
-          fotos: imagenesSecundarias,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + (await getToken()),
-        },
-      }
-    );
+    const response = await fetch(url + "api/createRestaurant", {
+      method: "POST",
+      body: JSON.stringify({
+        name: nombre,
+        own: userId,
+        fotoPerfil: imagenPrincipal,
+        description: descripcion,
+        etiquetas: etiquetas,
+        address: ubicacion,
+        latitude: parseFloat(coordenadas.latitude), // Convertir a número si es string
+        longitude: parseFloat(coordenadas.longitude),
+        viewed: 0, // Inicialmente en 0
+        reviews: [], // Iniciar con un array vacío
+        fotos: imagenesSecundarias,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + (await getToken()),
+      },
+    });
 
     setLoading(false);
 
@@ -301,7 +299,7 @@ export default function ModalCrearLocal({ visible, onClose, onSuccess }) {
                     const [lat, lon] = text
                       .split(",")
                       .map((item) => item.trim().slice(0, 11)); // Limita cada valor a 11 caracteres directamente
-                
+
                     setCoordenadas({
                       latitude: lat || "",
                       longitude: lon || "",

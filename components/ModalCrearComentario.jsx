@@ -22,6 +22,7 @@ import Icon from "@expo/vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { set } from "react-hook-form";
 import ModalNotificacion from "./ModalNotificacion";
+import url from "@/constants/url";
 
 const StarRating = ({ setStarts, stars }) => {
   return (
@@ -82,16 +83,13 @@ export default function ModalCrearComentario({
   };
 
   const getUser = async () => {
-    const response = await fetch(
-      "https://backend-swii.vercel.app/api/getUser/" + (await getUserId()),
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${await getToken()}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(url + "api/getUser/" + (await getUserId()), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${await getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (response.status == 200) {
       const data = await response.json();
@@ -106,27 +104,24 @@ export default function ModalCrearComentario({
   };
 
   const ponerComentario = async () => {
-    console.log(visible)
+    console.log(visible);
     try {
-      const response = await fetch(
-        "https://backend-swii.vercel.app/api/addComment/" + restaurante._id,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${await getToken()}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            comment: comment,
-            calification: stars,
-          }),
-        }
-      );
+      const response = await fetch(url + "api/addComment/" + restaurante._id, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${await getToken()}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          comment: comment,
+          calification: stars,
+        }),
+      });
 
       console.log(response);
 
       if (response.status == 201 || response.status == 200) {
-        console.log("Finalizo")
+        console.log("Finalizo");
         const data = await response.json();
         setModalPeticion({
           visible: true,

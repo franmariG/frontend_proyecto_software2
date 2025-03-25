@@ -1,11 +1,137 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Image, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
-import Zocial from '@expo/vector-icons/Zocial';
+import Zocial from "@expo/vector-icons/Zocial";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ModalNotificacion from "@/components/ModalNotificacion";
+import url from "@/constants/url";
 
+const getToken = async () => {
+  try {
+    const value = await AsyncStorage.getItem("token");
+    if (value != null) {
+      return value;
+    }
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
+};
+
+const Denuncia = ({ item, userNames, handleAction }) => {
+  const [comentario, setComentario] = useState(null);
+
+  const getComentario = async () => {
+    try {
+      const response = await fetch(url + `api/getCommentByIdUser`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
+        },
+        body: JSON.stringify({
+          restaurantId: item.idDenunciado,
+          userId: item.idComentario,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setComentario(data.comment.comment);
+      } else {
+        console.log("Unexpected response format:", data);
+      }
+    } catch (error) {
+      console.log("Error fetching comentario:", error);
+    }
+  };
+
+  useEffect(() => {
+    getComentario();
+  }, []);
+
+  return (
+    <View style={styles.cardContainer}>
+      <View style={styles.card}>
+        <View style={styles.textContainer}>
+          <View style={styles.iconCircle}>
+            <FontAwesome name="home" size={12} color="white" />
+          </View>
+          <Text>
+            <Text style={styles.bold}>Denunciante:</Text>{" "}
+            {userNames[item.idDenunciante] || item.idDenunciante}
+          </Text>
+        </View>
+        <View style={styles.textContainer}>
+          <View style={styles.iconCircle}>
+            <FontAwesome name="user" size={12} color="white" />
+          </View>
+          <Text>
+            <Text style={styles.bold}>Denunciado:</Text>{" "}
+            {userNames[item.idComentario] || item.idComentario}
+          </Text>
+        </View>
+        <View style={styles.textContainer}>
+          <View style={styles.iconCircle}>
+            <FontAwesome name="question" size={12} color="white" />
+          </View>
+          <Text>
+            <Text style={styles.bold}>Razón:</Text> {item.razon}
+          </Text>
+        </View>
+        <View style={styles.textContainer}>
+          <View style={styles.iconCircle}>
+            <Zocial name="email" size={12} color="white" />
+          </View>
+          <Text>
+            <Text style={styles.bold}>Comentario:</Text> {item.observacion}
+          </Text>
+        </View>
+        <View
+          style={{
+            width: "100%",
+            height: 1,
+            backgroundColor: "#000",
+            marginVertical: 7,
+          }}
+        ></View>
+        <View>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            Comentario Denunciado:
+          </Text>
+          <Text>{comentario}</Text>
+        </View>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.blockButton}
+          onPress={() => handleAction(item._id, false)}
+        >
+          <Text style={styles.buttonText}>Bloquear</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.omitButton}
+          onPress={() => handleAction(item._id, true)}
+        >
+          <Text style={styles.buttonText}>Omitir</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 const DenunciasScreenUsuarios = () => {
   const router = useRouter();
@@ -18,38 +144,33 @@ const DenunciasScreenUsuarios = () => {
   const [modalSuccess, setModalSuccess] = React.useState(false);
   const [userDataLoading, setUserDataLoading] = useState(true);
 
-
-  const getToken = async () => {
-    try {
-      const value = await AsyncStorage.getItem("token");
-      if (value != null) {
-        return value;
-      }
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
-  };
-
   const fetchDenuncias = async () => {
     try {
-      const response = await fetch('https://backend-swii.vercel.app/api/getDenuncias', {
-        method: 'GET',
+      const response = await fetch(url + "api/getDenuncias", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
       });
       const data = await response.json();
       if (data && Array.isArray(data.denuncias)) {
-        const filteredDenuncias = data.denuncias.filter(denuncia => denuncia.idComentario !== "" && denuncia.tipo !== "BANEADO");
-        setDenuncias(filteredDenuncias);
+        const filteredDenuncias = data.denuncias.filter(
+          (denuncia) =>
+            denuncia.idComentario !== "" && denuncia.tipo !== "BANEADO"
+        );
         console.log(filteredDenuncias);
+        if (filteredDenuncias.length > 0) {
+          setLoading(false);
+          setUserDataLoading(false);
+        } else {
+          setDenuncias(filteredDenuncias);
+        }
       } else {
-        console.log('Unexpected response format:', data);
+        console.log("Unexpected response format:", data);
       }
     } catch (error) {
-      console.log('Error fetching denuncias:', error);
+      console.log("Error fetching denuncias:", error);
     } finally {
       setLoading(false);
     }
@@ -57,11 +178,11 @@ const DenunciasScreenUsuarios = () => {
 
   const fetchUserData = async (id) => {
     try {
-      const response = await fetch(`https://backend-swii.vercel.app/api/getUser/${id}`, {
-        method: 'GET',
+      const response = await fetch(url + `api/getUser/${id}`, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
       });
       const data = await response.json();
@@ -71,40 +192,42 @@ const DenunciasScreenUsuarios = () => {
           [id]: data.userFound.name,
         }));
       } else {
-        console.log('Unexpected response format:', data);
+        console.log("Unexpected response format:", data);
       }
     } catch (error) {
-      console.log('Error fetching user data:', error);
+      console.log("Error fetching user data:", error);
     }
   };
 
   const deleteDenuncia = async (denunciaId) => {
     try {
-      const response = await fetch(`https://backend-swii.vercel.app/api/deleteDenuncia/${denunciaId}`, {
-        method: 'DELETE',
+      const response = await fetch(url + `api/deleteDenuncia/${denunciaId}`, {
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
       });
       if (response.ok) {
         console.log(`Denuncia ${denunciaId} eliminada exitosamente`);
-        setDenuncias((prevDenuncias) => prevDenuncias.filter((denuncia) => denuncia._id !== denunciaId));
+        setDenuncias((prevDenuncias) =>
+          prevDenuncias.filter((denuncia) => denuncia._id !== denunciaId)
+        );
       } else {
-        console.error('Error eliminando la denuncia:', response.statusText);
+        console.error("Error eliminando la denuncia:", response.statusText);
       }
     } catch (error) {
-      console.error('Error eliminando la denuncia:', error);
+      console.error("Error eliminando la denuncia:", error);
     }
   };
 
   const processDenuncia = async (denunciaId) => {
     try {
-      const response = await fetch(`https://backend-swii.vercel.app/api/procesarDenuncia/${denunciaId}`, {
-        method: 'POST',
+      const response = await fetch(url + `api/procesarDenuncia/${denunciaId}`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: "Bearer " + await getToken(),
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + (await getToken()),
         },
         body: JSON.stringify({
           tipo: "BANEADO",
@@ -117,7 +240,10 @@ const DenunciasScreenUsuarios = () => {
         setModalSuccess(true); // Indicar que la operación fue exitosa
         setModalVisible(true);
       } else {
-        console.error(`Error procesando la denuncia ${denunciaId}:`, response.statusText);
+        console.error(
+          `Error procesando la denuncia ${denunciaId}:`,
+          response.statusText
+        );
         setModalMessage("Error procesando la denuncia."); // Mensaje de error
         setModalSuccess(false); // Indicar que hubo un error
         setModalVisible(true);
@@ -135,7 +261,6 @@ const DenunciasScreenUsuarios = () => {
   }, []);
 
   useEffect(() => {
-  
     if (denuncias.length > 0) {
       const uniqueDenunciantes = new Set();
       const uniqueDenunciados = new Set();
@@ -170,12 +295,18 @@ const DenunciasScreenUsuarios = () => {
       {/* Encabezado */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push("/mainpage")}>
-          <Image source={require("@/assets/images/backButtonLocal.png")} style={styles.backButton} />
+          <Image
+            source={require("@/assets/images/backButtonLocal.png")}
+            style={styles.backButton}
+          />
         </TouchableOpacity>
-        <Image source={require("@/assets/images/Logo.png")} style={styles.logo} />
+        <Image
+          source={require("@/assets/images/Logo.png")}
+          style={styles.logo}
+        />
         <Text style={styles.title}>FOODIGO</Text>
       </View>
-      
+
       <Text style={styles.heading}>DENUNCIAS</Text>
       <Text style={styles.subheading}>Usuarios</Text>
       <View style={styles.separator} />
@@ -185,48 +316,19 @@ const DenunciasScreenUsuarios = () => {
       ) : (
         <>
           {denuncias.length === 0 ? (
-            <Text style={styles.noDenunciasText}>No se han encontrado denuncias</Text>
+            <Text style={styles.noDenunciasText}>
+              No se han encontrado denuncias
+            </Text>
           ) : (
             <FlatList
               data={denuncias}
               keyExtractor={(item) => item._id}
               renderItem={({ item }) => (
-                <View style={styles.cardContainer}>
-                  <View style={styles.card}>
-                    <View style={styles.textContainer}>
-                      <View style={styles.iconCircle}>
-                        <FontAwesome name="home" size={12} color="white" />
-                      </View> 
-                      <Text><Text style={styles.bold}>Denunciante:</Text> {userNames[item.idDenunciante] || item.idDenunciante}</Text>
-                    </View>
-                    <View style={styles.textContainer}>
-                      <View style={styles.iconCircle}>
-                        <FontAwesome name="user" size={12} color="white" />
-                      </View> 
-                      <Text><Text style={styles.bold}>Denunciado:</Text> {userNames[item.idComentario] || item.idComentario}</Text>
-                    </View>
-                    <View style={styles.textContainer}>
-                      <View style={styles.iconCircle}>
-                        <FontAwesome name="question" size={12} color="white" />
-                      </View> 
-                      <Text><Text style={styles.bold}>Razón:</Text> {item.razon}</Text>
-                    </View>
-                    <View style={styles.textContainer}>
-                      <View style={styles.iconCircle}>
-                        <Zocial name="email" size={12} color="white" />
-                      </View> 
-                      <Text><Text style={styles.bold}>Comentario:</Text> {item.observacion}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.blockButton} onPress={() => handleAction(item._id, false)}>
-                      <Text style={styles.buttonText}>Bloquear</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.omitButton} onPress={() => handleAction(item._id, true)}>
-                      <Text style={styles.buttonText}>Omitir</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                <Denuncia
+                  userNames={userNames}
+                  item={item}
+                  handleAction={handleAction}
+                />
               )}
             />
           )}
@@ -282,7 +384,6 @@ const styles = StyleSheet.create({
     color: "black",
     marginBottom: 10,
     marginLeft: 20,
-    
   },
   separator: {
     height: 1.5,
@@ -300,6 +401,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
+    gap: 5,
   },
   card: {
     backgroundColor: "#fff",
@@ -308,8 +410,9 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 6,
     flex: 1,
+    borderWidth: 1,
   },
   textContainer: {
     flexDirection: "row",
@@ -326,7 +429,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "column",
-    marginLeft: 10,
   },
   blockButton: {
     backgroundColor: "red",

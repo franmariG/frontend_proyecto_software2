@@ -9,6 +9,8 @@ import {
   FlatList,
   Pressable,
   Modal,
+  Dimensions,
+  Linking,
 } from "react-native";
 import { Tab, TabView } from "@rneui/themed";
 import Icon from "@expo/vector-icons/FontAwesome";
@@ -33,6 +35,8 @@ import ModalConfirmarAccion from "@/components/ModalConfirmarAccion";
 import ModalNotificacion from "@/components/ModalNotificacion";
 import ModalDeCarga from "@/components/ModalDeCarga";
 import ReportLocal from "./ReportLocal";
+import TabBrujula from "../components/Local/TabBrujula";
+import url from "@/constants/url";
 
 const ModalFoto = ({ foto, setDataModalFoto }) => {
   return (
@@ -128,7 +132,7 @@ const Local = () => {
 
   const getDatosDelRestaurante = async () => {
     const response = await fetch(
-      "https://backend-swii.vercel.app/api/getRestaurant/" + params.restaurante,
+      url + "api/getRestaurant/" + params.restaurante,
       {
         method: "GET",
         headers: {
@@ -184,21 +188,18 @@ const Local = () => {
   const toggleLike = async () => {
     try {
       if (!liked) {
-        const response = await fetch(
-          "https://backend-swii.vercel.app/api/addFavoriteRestaurant",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + (await getToken()),
-            },
-            body: JSON.stringify({
-              restaurantId: restaurante._id,
-            }),
-          }
-        );
-
         setLiked(true);
+        const response = await fetch(url + "api/addFavoriteRestaurant", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + (await getToken()),
+          },
+          body: JSON.stringify({
+            restaurantId: restaurante._id,
+          }),
+        });
+
         if (response.status === 200) {
           const data = await response.json();
         } else {
@@ -206,9 +207,9 @@ const Local = () => {
           setLiked(false);
         }
       } else {
+        setLiked(false);
         const response = await fetch(
-          "https://backend-swii.vercel.app/api/deleteRestaurantFromLiked/" +
-            (await getUserId()),
+          url + "api/deleteRestaurantFromLiked/" + (await getUserId()),
           {
             method: "PUT",
             headers: {
@@ -220,7 +221,6 @@ const Local = () => {
             }),
           }
         );
-        setLiked(false);
 
         if (response.status === 200) {
           const data = await response.json();
@@ -239,8 +239,7 @@ const Local = () => {
     setModalCarga(true);
     try {
       const response = await fetch(
-        "https://backend-swii.vercel.app/api/deleteRestaurant/" +
-          restaurante._id,
+        url + "api/deleteRestaurant/" + restaurante._id,
         {
           method: "DELETE",
           headers: {
@@ -290,190 +289,248 @@ const Local = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigate.back()}>
-            <Icon name="chevron-left" size={35} color="#8c0e03" />
-          </Pressable>
-          <Image
-            source={require("../assets/images/logo_recortado.png")}
-            style={styles.logo}
-          />
-          <Text style={styles.titulo}>FOODIGO</Text>
+        <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+          <View style={styles.header}>
+            <Pressable onPress={() => navigate.back()}>
+              <Icon name="chevron-left" size={35} color="#8c0e03" />
+            </Pressable>
+            <Image
+              source={require("../assets/images/logo_recortado.png")}
+              style={styles.logo}
+            />
+            <Text style={styles.titulo}>FOODIGO</Text>
 
-          {optionsVisible && (
-            <View
+            {optionsVisible && (
+              <View
+                style={{
+                  position: "absolute",
+                  top: 25,
+                  right: 33,
+                  borderWidth: 1,
+                  borderColor: "#00000098",
+                  borderRadius: 4,
+                  backgroundColor: "#FFF",
+                  zIndex: 10,
+                }}
+              >
+                {idUser != null && idUser == restaurante.own ? (
+                  <>
+                    <TouchableOpacity
+                      style={{ paddingVertical: 15, paddingHorizontal: 20 }}
+                      onPress={() => {
+                        setOptionsVisible(false);
+                        setModalEditaLocalVisible(true);
+                      }}
+                    >
+                      <Text style={{ fontWeight: 500 }}>Editar Local</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ paddingVertical: 15, paddingHorizontal: 20 }}
+                      onPress={() => {
+                        setOptionsVisible(false);
+                        setModalConfirmarAccionVisible(true);
+                      }}
+                    >
+                      <Text style={{ fontWeight: 500 }}>Eliminar Local</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <TouchableOpacity
+                      style={{ paddingVertical: 15, paddingHorizontal: 20 }}
+                      onPress={() => {
+                        setModalReportLocal(true);
+                        setOptionsVisible(false);
+                      }}
+                    >
+                      <Text style={{ fontWeight: 500 }}>Denunciar Local</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            )}
+
+            <TouchableOpacity
+              onPress={() => setOptionsVisible(!optionsVisible)}
               style={{
                 position: "absolute",
-                top: 25,
-                right: 33,
-                borderWidth: 1,
-                borderColor: "#00000098",
-                borderRadius: 4,
-                backgroundColor: "#FFF",
+                right: 10,
+                paddingLeft: 10,
+                paddingVertical: 10,
               }}
             >
-              {idUser != null && idUser == restaurante.own ? (
-                <>
-                  <TouchableOpacity
-                    style={{ paddingVertical: 15, paddingHorizontal: 20 }}
-                    onPress={() => {
-                      setOptionsVisible(false);
-                      setModalEditaLocalVisible(true);
-                    }}
-                  >
-                    <Text style={{ fontWeight: 500 }}>Editar Local</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ paddingVertical: 15, paddingHorizontal: 20 }}
-                    onPress={() => {
-                      setOptionsVisible(false);
-                      setModalConfirmarAccionVisible(true);
-                    }}
-                  >
-                    <Text style={{ fontWeight: 500 }}>Eliminar Local</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <TouchableOpacity
-                    style={{ paddingVertical: 15, paddingHorizontal: 20 }}
-                    onPress={() => {
-                      setModalReportLocal(true);
-                      setOptionsVisible(false);
-                    }}
-                  >
-                    <Text style={{ fontWeight: 500 }}>Denunciar Local</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
-          )}
-
-          <TouchableOpacity
-            onPress={() => setOptionsVisible(!optionsVisible)}
-            style={{
-              position: "absolute",
-              right: 10,
-              paddingLeft: 10,
-              paddingVertical: 10,
-            }}
-          >
-            <SimpleLineIcons name="options-vertical" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.restauranteInfo}>
-          <Text style={styles.restauranteNombre}>{restaurante.name}</Text>
-          <View style={styles.seccion}>
-            {restaurante.own && restaurante.own != idUser && (
-              <Pressable onPress={toggleLike} style={{ marginRight: 10 }}>
-                <Icon
-                  name={liked ? "heart" : "heart-o"}
-                  type="font-awesome"
-                  size={30}
-                  color="#8c0e03"
-                  style={{ ...styles.iconos }}
-                />
-              </Pressable>
-            )}
-            <Icon
-              name="comments"
-              type="font-awesome"
-              size={30}
-              color="#2199e4"
-              style={styles.iconos}
-            />
-
-            {!restaurante.reviews ? (
-              <PlaceholderText
-                style={{
-                  width: "30",
-                  marginRight: 8,
-                }}
-                width={30}
-                fontSize={20}
-              />
-            ) : (
-              <Text style={styles.ratingText}>
-                {restaurante.reviews ? restaurante.reviews.length : 0}
-              </Text>
-            )}
-            <Icon
-              name="star"
-              type="font-awesome"
-              size={30}
-              color="#e4dd21"
-              style={styles.iconos}
-            />
-            {!restaurante.reviews ? (
-              <PlaceholderText
-                style={{
-                  width: "30",
-                  marginRight: 8,
-                }}
-                width={30}
-                fontSize={20}
-              />
-            ) : (
-              <Text style={styles.ratingText}>
-                {restaurante.reviews.length > 0 &&
-                  (
-                    restaurante.reviews.reduce(
-                      (a, b) => parseInt(a) + parseInt(b.calification),
-                      0
-                    ) / restaurante.reviews.length
-                  ).toFixed(1)}
-                {restaurante.reviews.length == 0 && "0"}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        <View
-          style={{
-            ...styles.imageLogoContainer,
-          }}
-        >
-          {!restaurante.fotoPerfil ? (
-            <PlaceholderFoto width={"100%"} height={"100%"} />
-          ) : (
-            <TouchableOpacity
-              style={{ flex: 1, width: "100%", height: "100%" }}
-              onPress={() => setDataModalFoto(restaurante.fotoPerfil)}
-            >
-              <Image
-                source={{ uri: restaurante.fotoPerfil }}
-                style={{ ...styles.fixedImage }}
+              <SimpleLineIcons
+                name="options-vertical"
+                size={24}
+                color="black"
               />
             </TouchableOpacity>
-          )}
-        </View>
+          </View>
 
-        <Tab
-          value={index}
-          onChange={setIndex}
-          indicatorStyle={{ backgroundColor: "#07f" }}
-          style={styles.tabvistas}
-        >
-          <Tab.Item
-            title="Descripcion"
-            titleStyle={{
-              color: index === 0 ? "#07f" : "gray",
+          <View style={styles.restauranteInfo}>
+            <Text style={styles.restauranteNombre}>{restaurante.name}</Text>
+            {restaurante.own ? (
+              <Text
+                style={{
+                  marginBottom: 10,
+                  fontSize: 13,
+                  letterSpacing: 1.1,
+                  fontStyle: "italic",
+                  fontWeight: 300,
+                }}
+              >
+                {restaurante._id}
+              </Text>
+            ) : (
+              <PlaceholderText
+                width={200}
+                fontSize={10}
+                style={{ marginTop: 4 }}
+              />
+            )}
+            <View style={styles.seccion}>
+              {restaurante.own && restaurante.own != idUser && (
+                <Pressable onPress={toggleLike} style={{ marginRight: 10 }}>
+                  <Icon
+                    name={liked ? "heart" : "heart-o"}
+                    type="font-awesome"
+                    size={30}
+                    color="#8c0e03"
+                    style={{ ...styles.iconos }}
+                  />
+                </Pressable>
+              )}
+              <Icon
+                name="comments"
+                type="font-awesome"
+                size={30}
+                color="#2199e4"
+                style={styles.iconos}
+              />
+
+              {!restaurante.reviews ? (
+                <PlaceholderText
+                  style={{
+                    width: "30",
+                    marginRight: 8,
+                  }}
+                  width={30}
+                  fontSize={20}
+                />
+              ) : (
+                <Text style={styles.ratingText}>
+                  {restaurante.reviews ? restaurante.reviews.length : 0}
+                </Text>
+              )}
+              <Icon
+                name="star"
+                type="font-awesome"
+                size={30}
+                color="#e4dd21"
+                style={styles.iconos}
+              />
+              {!restaurante.reviews ? (
+                <PlaceholderText
+                  style={{
+                    width: "30",
+                    marginRight: 8,
+                  }}
+                  width={30}
+                  fontSize={20}
+                />
+              ) : (
+                <Text style={styles.ratingText}>
+                  {restaurante.reviews.length > 0 &&
+                    (
+                      restaurante.reviews.reduce(
+                        (a, b) => parseInt(a) + parseInt(b.calification),
+                        0
+                      ) / restaurante.reviews.length
+                    ).toFixed(1)}
+                  {restaurante.reviews.length == 0 && "0"}
+                </Text>
+              )}
+              <Pressable
+                style={{
+                  marginLeft: 5,
+                  backgroundColor: "#f1c40f",
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  flexDirection: "row",
+                  gap: 7,
+                }}
+                onPress={() => {
+                  console.log(
+                    `https://www.google.com/maps/search/?api=1&query=${restaurante.latitude}%2C${restaurante.longitude}`
+                  );
+                  Linking.openURL(
+                    `https://www.google.com/maps/search/?api=1&query=${restaurante.latitude}%2C${restaurante.longitude}`
+                  );
+                }}
+              >
+                <Icon name="map" size={20} color="#3498db" />
+                <Text style={{ color: "#fff", fontSize: 15, fontWeight: 600 }}>
+                  Ver en Maps
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <View
+            style={{
+              ...styles.imageLogoContainer,
             }}
-          />
-          <Tab.Item
-            title="Opiniones"
-            titleStyle={{
-              color: index === 1 ? "#07f" : "gray",
-            }}
-          />
-        </Tab>
+          >
+            {!restaurante.fotoPerfil ? (
+              <PlaceholderFoto width={"100%"} height={"100%"} />
+            ) : (
+              <TouchableOpacity
+                style={{ flex: 1, width: "100%", height: "100%" }}
+                onPress={() => setDataModalFoto(restaurante.fotoPerfil)}
+              >
+                <Image
+                  source={{ uri: restaurante.fotoPerfil }}
+                  style={{ ...styles.fixedImage }}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <Tab
+            value={index}
+            onChange={setIndex}
+            indicatorStyle={{ backgroundColor: "#07f" }}
+            style={styles.tabvistas}
+            // scrollable={true}
+          >
+            <Tab.Item
+              title="Descripcion"
+              titleStyle={{
+                color: index === 0 ? "#07f" : "gray",
+              }}
+            />
+            <Tab.Item
+              title="Opiniones"
+              titleStyle={{
+                color: index === 1 ? "#07f" : "gray",
+              }}
+            />
+            {/* <Tab.Item
+              title="Brujula"
+              titleStyle={{
+                color: index === 2 ? "#07f" : "gray",
+              }}
+            /> */}
+          </Tab>
+        </View>
 
         <TabView
           value={index}
           onChange={setIndex}
           animationType="spring"
           minSwipeRatio={0.3}
+          containerStyle={{ width: Dimensions.get("window").width }}
+          tabItemContainerStyle={{ paddingHorizontal: 10 }}
         >
           {/* Descripcion */}
           <TabDescripcion
@@ -491,6 +548,10 @@ const Local = () => {
             setComentarioADenunciar={setComentarioADenunciar}
             getDatosDelRestaurante={getDatosDelRestaurante}
           />
+          {/* <TabBrujula
+            latitude={restaurante.latitude}
+            longitude={restaurante.longitude}
+          /> */}
         </TabView>
       </SafeAreaView>
       <ModalCrearComentario
@@ -568,7 +629,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     fontFamily: "Open-Sans",
-    padding: 10,
   },
   header: {
     flexDirection: "row",
@@ -665,6 +725,7 @@ const styles = StyleSheet.create({
   restauranteNombre: {
     fontSize: 24,
     fontWeight: "bold",
+    margin: 0,
   },
 
   restauranteTipo: {

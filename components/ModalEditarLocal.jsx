@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import ModalDeCarga from "../components/ModalDeCarga";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Notificacion from "../components/ModalNotificacion";
+import url from "@/constants/url";
 
 export default function ModalEditarLocal({ visible, onClose, localData }) {
   const [nombre, setNombre] = useState(localData.name);
@@ -124,7 +125,7 @@ export default function ModalEditarLocal({ visible, onClose, localData }) {
 
     setLoading(true);
     const response = await fetch(
-      `https://backend-swii.vercel.app/api/updateRestaurant/${localData._id}`,
+      url + `api/updateRestaurant/${localData._id}`,
       {
         method: "PUT",
 
